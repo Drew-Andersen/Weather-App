@@ -2,8 +2,37 @@ const apiKey = '8f49c9fb0f482a3ae81198fe62e5b25d';
 const inputCity = $('#city-input');
 const submitBtn = $('#submit-btn');
 const currentWeatherDiv = $('#curent-weather');
+const forcastWeatherDiv = $('#weather-forcast');
 const historyDiv = $('#city-history');
-const storedCities = JSON.parse(localStorage.getItem('cities')) || [];
+
+
+function getCities () {
+    const storedCities = JSON.parse(localStorage.getItem('cities')); 
+    if(storedCities !== null){
+        return storedCities;
+    } else {
+        const emptyCity = [];
+        return emptyCity;
+    }
+}
+
+function saveCities (cities) {
+    const tempCities = getCities();
+    tempCities.push(cities);
+    localStorage.setItem('cities', JSON.stringify(tempCities));
+}
+
+function displayCities () {
+    historyDiv.empty();
+    const tempCities = getCities();
+    tempCities.forEach((city,i) => {
+        const cityCard = $('<div>');
+        cityCard.addClass('city-card bg-secondary text-white text-center border border-light rounded');
+        cityCard.attr('data-id', i);
+        cityCard.text(city);
+        historyDiv.append(cityCard);
+    });
+}
 
 function getData() {
     let city = inputCity.val().trim();
@@ -15,9 +44,11 @@ function getData() {
     })
     .then(function (data) {
       console.log(data);
+      currentWeatherDiv.empty();
       renderCurrentWeather(city,data);
+      saveCities(city);
+      displayCities();
     //   renderForcastWeather(city,data);
-      storedInHistory(city);
     })
     .catch(function (error) {
       console.log(error);
@@ -25,7 +56,7 @@ function getData() {
 }
 
 function renderCurrentWeather (city,weather) {
-    const cityName = weather.city.name;
+    const cityName = city.name;
     const curDate = dayjs().format('M/D/YYYY');
     const temp = weather.list[0].main.temp;
     const wind = weather.list[0].wind.speed;
@@ -55,29 +86,19 @@ function renderCurrentWeather (city,weather) {
 //     console.log('forcast funciton'); // Is working
 // }
     
-function storedInHistory (city) {
-    storedCities.push(city);
-    localStorage.setItem('cities', JSON.stringify(storedCities));
+function handleSearchHistory () {
+    cityID = $(this).attr('data-id');
+    let savedCities = getCities();
+    currentWeatherDiv.empty();
+    // forcastWeatherDiv.empty();
+    renderCurrentWeather(savedCities[cityID]);
+    // renderForcastWeather(savedCities[cityID]);
 }
-
-function createHistoryBtn () {
-    const historyCities = JSON.parse(localStorage.getItem('cities'));
-
-    for (i = 0; i < historyCities.length; i++) {
-        const historyBtn = $('<button>');
-        historyBtn.addClass('btn history-btn text-white-50');
-        historyBtn.text(historyCities[i]);
-        historyDiv.append(historyBtn);
-        console.log(historyCities);
-    };
-}
-
-// function handleSearchHistory () {
-
-// }
 
 submitBtn.on('click', getData);
-// historyDiv.on('click', handleSearchHistory);
+historyDiv.on('click', '.city-card', handleSearchHistory);
+
+window.onload = displayCities;
 
 
 
