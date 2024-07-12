@@ -37,18 +37,18 @@ function displayCities() {
 function getData() {
     let city = inputCity.val().trim();
     const apiURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=imperial`;
-    https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&
 
     fetch(apiURL)
         .then(function (response) {
             return response.json();
         })
         .then(function (data) {
-            console.log(data);
-            currentWeatherDiv.empty();
-            renderCurrentWeather(city, data);
+            // console.log(data);
             saveCities(city);
             displayCities();
+            currentWeatherDiv.empty();
+            forcastWeatherDiv.empty();
+            renderCurrentWeather(city, data) 
             renderForcastWeather(city,data);
         })
         .catch(function (error) {
@@ -57,6 +57,7 @@ function getData() {
 }
 
 function renderCurrentWeather(city, weather) {
+    console.log(weather)
     const cityName = weather.city.name;
     const curDate = dayjs().format('M/D/YYYY');
     const temp = weather.list[0].main.temp;
@@ -83,8 +84,8 @@ function renderCurrentWeather(city, weather) {
     currentWeatherDiv.append(weatherDiv);
 }
 
-//ToDo 
 function renderForcastWeather (city,weather) {
+    let dayOffset = 0;
     for (let i = 0; i <5; i++) {
         // Add a div to hold the card elements
         const forcastCard = $('<div>');
@@ -94,20 +95,23 @@ function renderForcastWeather (city,weather) {
         forcastDate.text(dayjs().add(i + 1, 'day').format('M/D/YYYY'));
         // Create weather icon
         const weatherIcon = $('<img>');
-        const icon = weather.list[i].weather[0].icon;
+        const icon = weather.list[dayOffset].weather[0].icon;
         weatherIcon.attr('src', `https://openweathermap.org/img/wn/${icon}@2x.png`);
         // Creat temp component
-        const temp = weather.list[i].main.temp;
+        const temp = weather.list[dayOffset].main.temp;
         const tempDiv = $('<p>');
         tempDiv.text('Temp: ' + temp + '°F');
         // Create wind component
-        const wind = weather.list[i].wind.speed;
+        const wind = weather.list[dayOffset].wind.speed;
         const windDiv = $('<p>');
         windDiv.text('Wind: ' + wind + 'mph');
         // Add humidity component
-        const humid = weather.list[i].main.humidity;
+        const humid = weather.list[dayOffset].main.humidity;
         const humidDiv = $('<p>');
         humidDiv.text('Humidity: ' + humid + '%');
+
+        // Checks to make sure that it is per day not every 3 hours
+        dayOffset = dayOffset + 8;
 
         // Append them to the page
         forcastCard.append(forcastDate, weatherIcon, tempDiv, windDiv, humidDiv);
@@ -119,9 +123,9 @@ function handleSearchHistory() {
     cityID = $(this).attr('data-id');
     let savedCities = getCities();
     currentWeatherDiv.empty();
-    // forcastWeatherDiv.empty();
+    forcastWeatherDiv.empty();
     renderCurrentWeather(savedCities[cityID]);
-    // renderForcastWeather(savedCities[cityID]);
+    renderForcastWeather(savedCities[cityID]);
 }
 
 submitBtn.on('click', getData);
