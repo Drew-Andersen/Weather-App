@@ -1,3 +1,6 @@
+// Bug not letting the history buttons work
+    // Cannot read properties of 'city' line 64:30.
+
 const apiKey = '8f49c9fb0f482a3ae81198fe62e5b25d';
 const inputCity = $('#city-input');
 const submitBtn = $('#submit-btn');
@@ -5,7 +8,7 @@ const currentWeatherDiv = $('#curent-weather');
 const forcastWeatherDiv = $('#weather-forcast');
 const historyDiv = $('#city-history');
 
-
+// Check if there are cities stored in localStorage, if not create a new empty array
 function getCities() {
     const storedCities = JSON.parse(localStorage.getItem('cities'));
     if (storedCities !== null) {
@@ -16,6 +19,7 @@ function getCities() {
     }
 }
 
+// Save the searched cities to localStorage
 function saveCities(cities) {
     const tempCities = getCities();
     tempCities.push(cities);
@@ -25,10 +29,12 @@ function saveCities(cities) {
 function displayCities() {
     historyDiv.empty();
     const tempCities = getCities();
+    // Loop through localStoage and create a <button> for each stored city
     tempCities.forEach((city, i) => {
-        const cityCard = $('<div>');
-        cityCard.addClass('city-card bg-secondary text-white text-center border border-light rounded');
+        const cityCard = $('<button>'); 
+        cityCard.addClass('city-card bg-secondary text-white text-center border border-light rounded col-12 mb-1');
         cityCard.attr('data-id', i);
+        // Text of the <button> is set to the city name
         cityCard.text(city);
         historyDiv.append(cityCard);
     });
@@ -43,11 +49,12 @@ function getData() {
             return response.json();
         })
         .then(function (data) {
-            // console.log(data);
+            // Empty the divs
             currentWeatherDiv.empty();
             forcastWeatherDiv.empty();
-            saveCities(city);
+            // Run the functions with the data
             displayCities();
+            saveCities(city);
             renderCurrentWeather(city, data) 
             renderForcastWeather(city,data);
         })
@@ -57,7 +64,8 @@ function getData() {
 }
 
 function renderCurrentWeather(city, weather) {
-    // console.log(weather)
+    // console.log(weather);
+    // Created variables 
     const cityName = weather.city.name;
     const curDate = dayjs().format('M/D/YYYY');
     const temp = weather.list[0].main.temp;
@@ -66,6 +74,7 @@ function renderCurrentWeather(city, weather) {
     const icon = weather.list[0].weather[0].icon;
     const iconURL = `https://openweathermap.org/img/wn/${icon}.png`;
 
+    // Created elements to hold the variables
     const weatherDiv = $('<div>').addClass('card col-10 m-auto');
     const cityNameh4 = $('<h4>');
     const temph6 = $("<h6>");
@@ -73,12 +82,14 @@ function renderCurrentWeather(city, weather) {
     const humidityH6 = $('<h6>');
     const iconImg = $('<img>');
 
+    // Added text to the variables
     cityNameh4.text(cityName + ' (' + curDate + ')');
     temph6.text('Temp: ' + temp + '°F');
     windH6.text('Wind: ' + wind + 'mph');
     humidityH6.text('Humidity: ' + humid + '%');
     iconImg.attr('src', iconURL);
 
+    // Appended the elements to the page
     cityNameh4.append(iconImg)
     weatherDiv.append(cityNameh4, temph6, windH6, humidityH6);
     currentWeatherDiv.append(weatherDiv);
@@ -120,14 +131,19 @@ function renderForcastWeather (city,weather) {
 }
 
 function handleSearchHistory() {
+    // Targets the history buttons (attribute = data-id)
     cityID = $(this).attr('data-id');
+    // Pull the cities from localStorage
     let savedCities = getCities();
+    // Empty the current weather and forcast divs
     currentWeatherDiv.empty();
     forcastWeatherDiv.empty();
+    // Run the functions with the stored cities
     renderCurrentWeather(savedCities[cityID]);
     renderForcastWeather(savedCities[cityID]);
 }
 
+// Event listeners
 submitBtn.on('click', getData);
 historyDiv.on('click', '.city-card', handleSearchHistory);
 
