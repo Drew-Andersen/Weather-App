@@ -44,10 +44,10 @@ function getData() {
         })
         .then(function (data) {
             // console.log(data);
-            saveCities(city);
-            displayCities();
             currentWeatherDiv.empty();
             forcastWeatherDiv.empty();
+            saveCities(city);
+            displayCities();
             renderCurrentWeather(city, data) 
             renderForcastWeather(city,data);
         })
@@ -57,7 +57,7 @@ function getData() {
 }
 
 function renderCurrentWeather(city, weather) {
-    console.log(weather)
+    // console.log(weather)
     const cityName = weather.city.name;
     const curDate = dayjs().format('M/D/YYYY');
     const temp = weather.list[0].main.temp;
